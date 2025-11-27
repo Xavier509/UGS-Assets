@@ -3613,7 +3613,7 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 		var self = this;
 		if (this.isWKWebView)
 		{
-			this.fetchLocalFileViaCordovaAsText("https://cdn.jsdelivr.net/gh/Arjun99ab/ovo@main/1.4.5/data.js", function (str)
+			this.fetchLocalFileViaCordovaAsText("https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@21a2709b9f89d7ce24ec5f6263f72c7c0da1d143/ovomod/data.js", function (str)
 			{
 				self.loadProject(JSON.parse(str));
 			}, function (err)
@@ -3627,9 +3627,9 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 			xhr = new ActiveXObject("Microsoft.XMLHTTP");
 		else
 			xhr = new XMLHttpRequest();
-		var datajs_filename = "data.js";
+		var datajs_filename = "https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@21a2709b9f89d7ce24ec5f6263f72c7c0da1d143/ovomod/";
 		if (this.isWindows8App || this.isWindowsPhone8 || this.isWindowsPhone81 || this.isWindows10)
-			datajs_filename = "data.json";
+			datajs_filename = "https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@21a2709b9f89d7ce24ec5f6263f72c7c0da1d143/ovomod/";
 		xhr.open("GET", datajs_filename, true);
 		var supportsJsonResponse = false;
 		if (!this.isDomFree && ("response" in xhr) && ("responseType" in xhr))
