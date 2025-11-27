@@ -3613,7 +3613,7 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 		var self = this;
 		if (this.isWKWebView)
 		{
-			this.fetchLocalFileViaCordovaAsText("https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/ovomod/data.js", function (str)
+			this.fetchLocalFileViaCordovaAsText("data.js", function (str)
 			{
 				self.loadProject(JSON.parse(str));
 			}, function (err)
