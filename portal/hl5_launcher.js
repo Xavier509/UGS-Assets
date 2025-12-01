@@ -130,10 +130,6 @@ if (ENVIRONMENT_IS_NODE) {
           this.loadMapParts(mapName, 7, resolve, reject)
           return promise
         }
-          if (mapName === 'testchmb_a_00') {
-          this.loadMapParts(mapName, 3, resolve, reject)
-          return promise
-        }
 
         const xhr = new XMLHttpRequest()
         xhr.responseType = 'arraybuffer'
