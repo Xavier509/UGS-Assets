@@ -18,46 +18,43 @@
        - You can change the probability (0.8) or the stddev multiplier (0.12)
          to make it stronger/weaker. Call window.__rigMathRandom(false) to
          restore original Math.random (for testing). -->
-  <script>
+<script>
     (function () {
       const origRandom = Math.random;
-      // tune these to change rig strength:
-      const CENTER_BIAS_PROB = 0.8;   // probability to use biased value
-      const GAUSS_STD_MULT = 0.12;    // std dev multiplier (smaller => tighter around 0.5)
-
-      // Box-Muller transform to get a gaussian value with mean 0 and std 1
-      function gaussian(rand) {
-        let u = 0, v = 0;
-        while (u === 0) u = rand();
-        while (v === 0) v = rand();
-        return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-      }
+      // EDGE BIAS: pushes toward 0 or 1 (outer slots = winners)
+      const EDGE_BIAS_PROB = 0.85;      // 85% of calls use edge bias
+      const EDGE_STRENGTH = 0.75;       // how far toward edges (0.75 = very strong)
 
       Math.random = function () {
-        // use original RNG to decide whether to bias
         const p = origRandom();
-        if (p < CENTER_BIAS_PROB) {
-          // produce gaussian around 0.5 with small sigma
-          const g = gaussian(origRandom);
-          const val = 0.5 + g * GAUSS_STD_MULT;
-          // clamp to [0,1]
-          return val < 0 ? 0 : val > 1 ? 1 : val;
+        if (p < EDGE_BIAS_PROB) {
+          // Pick left (0) or right (1) edge randomly
+          const goLeft = origRandom() < 0.5;
+          const base = origRandom();
+          
+          if (goLeft) {
+            // Bias toward 0 (left edge)
+            return base * (1 - EDGE_STRENGTH);
+          } else {
+            // Bias toward 1 (right edge)
+            return 1 - (base * (1 - EDGE_STRENGTH));
+          }
         }
-        // otherwise, fall back to original uniform random
+        // 15% of time use normal random (keeps it looking natural)
         return origRandom();
       };
 
-      // helper to restore the original RNG if needed
+      // Helper to restore or adjust
       window.__rigMathRandom = function (enable) {
         if (!enable) {
           Math.random = origRandom;
         } else {
           Math.random = function () {
             const p = origRandom();
-            if (p < CENTER_BIAS_PROB) {
-              const g = gaussian(origRandom);
-              const val = 0.5 + g * GAUSS_STD_MULT;
-              return val < 0 ? 0 : val > 1 ? 1 : val;
+            if (p < EDGE_BIAS_PROB) {
+              const goLeft = origRandom() < 0.5;
+              const base = origRandom();
+              return goLeft ? base * (1 - EDGE_STRENGTH) : 1 - (base * (1 - EDGE_STRENGTH));
             }
             return origRandom();
           };
