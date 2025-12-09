@@ -22,8 +22,8 @@
     (function () {
       const origRandom = Math.random;
       // EDGE BIAS: pushes toward 0 or 1 (outer slots = winners)
-      const EDGE_BIAS_PROB = 0.85;      // 85% of calls use edge bias
-      const EDGE_STRENGTH = 0.75;       // how far toward edges (0.75 = very strong)
+      const EDGE_BIAS_PROB = 0.95;      // 85% of calls use edge bias
+      const EDGE_STRENGTH = 0.8;       // how far toward edges (0.75 = very strong)
 
       Math.random = function () {
         const p = origRandom();
