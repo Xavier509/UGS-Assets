@@ -11,55 +11,74 @@
   <meta property="og:description" content="A web-based Plinko game inspired by Stake.com, built using Svelte and Tailwind CSS" />
   <script src="./_app/immutable/assets/rng-bias.js"></script>
   
-  <!-- RIGGING SCRIPT: biases Math.random toward the center (0.5).
-       - Behavior: 80% of calls return a value close to 0.5 (small Gaussian),
-         20% of calls use the original random. This keeps the page looking
-         identical while strongly improving odds of landing centrally.
-       - You can change the probability (0.8) or the stddev multiplier (0.12)
-         to make it stronger/weaker. Call window.__rigMathRandom(false) to
-         restore original Math.random (for testing). -->
-<script>
+  <!-- OPTIMIZED RIGGING SCRIPT: Heavy bias toward outer edges (high multipliers)
+       - 93% of calls bias toward extreme outer edges (where winners are)
+       - 7% use normal random for natural appearance
+       - Adjustable: increase EDGE_BIAS_PROB for even higher win rate
+       - Adjustable: increase EDGE_STRENGTH to hit more extreme multipliers -->
+  <script>
     (function () {
       const origRandom = Math.random;
-      // EDGE BIAS: pushes toward 0 or 1 (outer slots = winners)
-      const EDGE_BIAS_PROB = 1.0;      // 85% of calls use edge bias
-      const EDGE_STRENGTH = 0.9;       // how far toward edges (0.75 = very strong)
-
+      
+      // TUNING PARAMETERS - adjust these for different results
+      const EDGE_BIAS_PROB = 0.93;      // 93% of drops favor outer edges
+      const EDGE_STRENGTH = 0.82;       // How extreme (0.82 = very strong)
+      const OUTER_PREFERENCE = 0.88;    // Prefer outermost slots even more
+      
       Math.random = function () {
-        const p = origRandom();
-        if (p < EDGE_BIAS_PROB) {
-          // Pick left (0) or right (1) edge randomly
+        const selector = origRandom();
+        
+        if (selector < EDGE_BIAS_PROB) {
+          // Decide left or right edge
           const goLeft = origRandom() < 0.5;
-          const base = origRandom();
+          const intensity = origRandom();
+          
+          // Apply extra bias to push to outermost positions
+          const biasedValue = intensity < OUTER_PREFERENCE 
+            ? intensity * 0.5  // Push even harder to edge
+            : intensity;
           
           if (goLeft) {
-            // Bias toward 0 (left edge)
-            return base * (1 - EDGE_STRENGTH);
+            // Strong bias toward 0 (leftmost winning slots)
+            return biasedValue * (1 - EDGE_STRENGTH);
           } else {
-            // Bias toward 1 (right edge)
-            return 1 - (base * (1 - EDGE_STRENGTH));
+            // Strong bias toward 1 (rightmost winning slots)
+            return 1 - (biasedValue * (1 - EDGE_STRENGTH));
           }
         }
-        // 15% of time use normal random (keeps it looking natural)
+        
+        // 7% of time: use normal random for variety
         return origRandom();
       };
 
-      // Helper to restore or adjust
-      window.__rigMathRandom = function (enable) {
+      // Utility function to adjust or disable rigging
+      window.__rigMathRandom = function (enable, edgeBias, edgeStrength) {
         if (!enable) {
           Math.random = origRandom;
+          console.log('Rigging disabled - using fair random');
         } else {
+          const bias = edgeBias || EDGE_BIAS_PROB;
+          const strength = edgeStrength || EDGE_STRENGTH;
+          
           Math.random = function () {
-            const p = origRandom();
-            if (p < EDGE_BIAS_PROB) {
+            const selector = origRandom();
+            if (selector < bias) {
               const goLeft = origRandom() < 0.5;
-              const base = origRandom();
-              return goLeft ? base * (1 - EDGE_STRENGTH) : 1 - (base * (1 - EDGE_STRENGTH));
+              const intensity = origRandom();
+              const biasedValue = intensity < OUTER_PREFERENCE ? intensity * 0.5 : intensity;
+              
+              return goLeft 
+                ? biasedValue * (1 - strength)
+                : 1 - (biasedValue * (1 - strength));
             }
             return origRandom();
           };
+          console.log(`Rigging enabled - bias: ${bias}, strength: ${strength}`);
         }
       };
+      
+      // Log status (remove this line if you want it silent)
+      console.log('🎰 High-win mode active - outer edge bias enabled');
     })();
   </script>
 
@@ -74,17 +93,17 @@
   <link rel="modulepreload" href="./_app/immutable/nodes/0.DFoEgtk2.js">
   <link rel="modulepreload" href="./_app/immutable/nodes/3.BWmqIxuo.js">
   <link rel="modulepreload" href="./_app/immutable/chunks/Plinko.BrtK7NtZ.js">
-  <title>Free Plinko Game Online - Play &amp; Win Instant Rewards</title><!-- HEAD_svelte-f88f7m_START -->
+  <title>Free Plinko Game Online - Play &amp; Win Instant Rewards</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link rel="canonical" href="https://plinko-game-online.github.io/">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet">
-  <meta name="description" content="Experience authentic Plinko gameplay online! Drop discs through pegs for exciting rewards in this classic arcade game. No download or registration required - start [...]
+  <meta name="description" content="Experience authentic Plinko gameplay online! Drop discs through pegs for exciting rewards in this classic arcade game. No download or registration required - start [...]">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Free Plinko Game Online">
   <meta property="og:url" content="https://plinko-game-online.github.io/">
   <meta property="og:image" content="/_app/immutable/assets/og_image.PzHn9Bxz.jpg">
-  <meta name="google-site-verification" content="lTwaQTJ2H6vMNYMUd9ooaLxzvssiGoQEuoRdsOYNX8g"><!-- HEAD_svelte-f88f7m_END -->
+  <meta name="google-site-verification" content="lTwaQTJ2H6vMNYMUd9ooaLxzvssiGoQEuoRdsOYNX8g">
 
   <!-- Google Tag Manager -->
   <script>
@@ -98,8 +117,7 @@
         j = d.createElement(s),
         dl = l != 'dataLayer' ? '&l=' + l : '';
       j.async = true;
-      j.src =
-        'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+      j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
       f.parentNode.insertBefore(j, f);
     })(window, document, 'script', 'dataLayer', 'GTM-NKW5KHS4');
   </script>
